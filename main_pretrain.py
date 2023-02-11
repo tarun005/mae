@@ -40,6 +40,7 @@ def get_args_parser():
     parser.add_argument('--batch_size', default=64, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
     parser.add_argument('--epochs', default=400, type=int)
+    parser.add_argument('--subset_size', default=1e6, type=int, help="size of the dataset")
     parser.add_argument('--accum_iter', default=1, type=int,
                         help='Accumulate gradient iterations (for increasing the effective batch size under memory constraints)')
 
@@ -130,6 +131,7 @@ def main(args):
         dataset_train = datasets.ImageFolder(os.path.join(args.data_path, 'train'), transform=transform_train)
     else:
         dataset_train = datasets.ImageFolder(args.data_path, transform=transform_train)
+    dataset_train = torch.utils.data.Subset(dataset_train, misc.select_indices(dataset_train, args.subset_size))
     print(dataset_train)
 
     if True:  # args.distributed:

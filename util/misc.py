@@ -19,6 +19,7 @@ from pathlib import Path
 import torch
 import torch.distributed as dist
 from torch._six import inf
+import numpy as np
 
 
 class SmoothedValue(object):
@@ -338,3 +339,28 @@ def all_reduce_mean(x):
         return x_reduce.item()
     else:
         return x
+
+def select_indices(dataset, len_subset, mode="class_balanced"):
+    """
+    Return a subset of dataset by sampling a fraction of samples from each class.
+    The total # after sampling must match len_subset.
+    """
+
+    from collections import Counter
+
+    len_dataset = len(dataset)
+    keep_frac = len_subset/len_dataset
+
+    targets = dataset.targets
+    cls_num_list = Counter(targets)
+
+    select_idxs = []
+    for label_id , n_s in cls_num_list.items():
+        class_indices = np.where(np.array(targets) == label_id)[0]
+        np.random.shuffle(class_indices)
+        num_sample = int(n_s*keep_frac)
+        select_idx_label = class_indices[:int(num_sample)]
+        select_idxs.extend(select_idx_label.tolist())
+
+    return select_idxs
+

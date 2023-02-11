@@ -9,6 +9,10 @@
 # BEiT: https://github.com/microsoft/unilm/tree/master/beit
 # --------------------------------------------------------
 
+##
+# add save folder names
+# add dataset pruning
+
 import argparse
 import datetime
 import json
