@@ -392,6 +392,6 @@ class ImageFolderEx(torchvision.datasets.ImageFolder):
         return sample, target
 
 def collate_fn(batch):
-    batch = list(filter(lambda x: x is not None, batch))
+    batch = list(filter(lambda x: x[0] is not None and x[1] is not None, batch))
     return torch.utils.data.dataloader.default_collate(batch)
 
