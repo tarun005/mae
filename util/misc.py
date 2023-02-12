@@ -18,8 +18,11 @@ from pathlib import Path
 
 import torch
 import torch.distributed as dist
+import torchvision
 from torch._six import inf
 import numpy as np
+
+from typing import Tuple, Any
 
 
 class SmoothedValue(object):
@@ -363,4 +366,32 @@ def select_indices(dataset, len_subset, mode="class_balanced"):
         select_idxs.extend(select_idx_label.tolist())
 
     return select_idxs
+
+class ImageFolderEx(torchvision.datasets.ImageFolder):
+
+    def __getitem__(self, index: int) -> Tuple[Any, Any]:
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (sample, target) where target is class_index of the target class.
+        """
+        path, target = self.samples[index]
+
+        try:
+            sample = self.loader(path)
+        except:
+            return None, None
+
+        if self.transform is not None:
+            sample = self.transform(sample)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return sample, target
+
+def collate_fn(batch):
+    batch = list(filter(lambda x: x is not None, batch))
+    return torch.utils.data.dataloader.default_collate(batch)
 

@@ -29,6 +29,7 @@ import timm.optim.optim_factory as optim_factory
 
 import util.misc as misc
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
+from util.misc import ImageFolderEx, collate_fn
 
 import models_mae
 
@@ -128,9 +129,9 @@ def main(args):
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
     
     if os.path.exists(os.path.join(args.data_path, 'train')):
-        dataset_train = datasets.ImageFolder(os.path.join(args.data_path, 'train'), transform=transform_train)
+        dataset_train = ImageFolderEx(os.path.join(args.data_path, 'train'), transform=transform_train)
     else:
-        dataset_train = datasets.ImageFolder(args.data_path, transform=transform_train)
+        dataset_train = ImageFolderEx(args.data_path, transform=transform_train)
     dataset_train = torch.utils.data.Subset(dataset_train, misc.select_indices(dataset_train, args.subset_size))
     print(dataset_train)
 
@@ -156,6 +157,7 @@ def main(args):
         num_workers=args.num_workers,
         pin_memory=args.pin_mem,
         drop_last=True,
+        collate_fn=collate_fn
     )
     
     # define the model
